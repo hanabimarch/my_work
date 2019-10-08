@@ -35,7 +35,7 @@ for bnname in yearnamelist:
 
 		ni_s,ni_list = zhf.readcol(file_1_link)
 		bgo = zhf.readcol(file_2_link)[0][0]
-
+		print(bnname)
 		if(len(ni_s)>=2):
 			try:
 				ni_list = ni_list[:2]
@@ -50,22 +50,31 @@ for bnname in yearnamelist:
 					print('time slice ',i)
 					savedir = makedirs + 'time_' + str(i) + '/'
 					filelist = ['A_'+bnname+'_'+bgo+'.pha']
+					dt = edges_stop[i]-edges_start[i]
+					#-------------------------------------------------
+					if(dt/3.>=1):
+						binsize = 1            #动态binsize
+					else:
+						binsize = dt/3.
+					#-------------------------------------------------
 					for ni in ni_list:
 						print(ni)
-						filelist.append('A_'+bnname+'_'+ni+'.pha')
-						make_phaI_with_events(bnname,ni,data_topdir,savedir,edges_start[i],edges_stop[i])
+						filelist.append('A_'+bnname+'_'+ni+'.pha')						
+						make_phaI(bnname,ni,data_topdir,savedir,edges_start[i],edges_stop[i],binsize = binsize)#这里只有选0.01才可以
+						#make_phaI_with_events(bnname,ni,data_topdir,savedir,edges_start[i],edges_stop[i])
 						plt.savefig(save_all+'A_'+bnname+'_'+ni+'_'+str(i)+'.png')
 						plt.close()
 					print(bgo)
-					make_phaI_with_events(bnname,bgo,data_topdir,savedir,edges_start[i],edges_stop[i])
+					make_phaI(bnname,bgo,data_topdir,savedir,edges_start[i],edges_stop[i],binsize = binsize)
+					#make_phaI_with_events(bnname,bgo,data_topdir,savedir,edges_start[i],edges_stop[i])
 					plt.savefig(save_all+'A_'+bnname+'_'+bgo+'_'+str(i)+'.png')
 					plt.close()
 					print('---------------------------------------')
 					try:
 						value,value_arr1,value_arr2,flux_list = xspec_fit_kernel(filelist,savedir,makedirs+'Z_'+str(i))
-						#plt.savefig(save_all2 + 'A_'+bnname+'_'+str(i)+'.png')
-						#plt.close()
-						copy_rspI(savedir+'foldedspec.png',save_all2 + 'A_'+bnname+'_'+str(i)+'.png')
+						plt.savefig(save_all2 + 'A_'+bnname+'_'+str(i)+'.png')
+						plt.close()
+						#copy_rspI(savedir+'foldedspec.png',save_all2 + 'A_'+bnname+'_'+str(i)+'.png')
 						zhf.printdatatofile(makedirs+'Z_'+str(i)+'_Flux.txt',data = flux_list)
 						zhf.printdatatofile(makedirs+'Z_'+str(i)+'_Epec.txt',data = [[value],[value_arr1],[value_arr2]])
 					except:
