@@ -2,14 +2,14 @@ from xspec import *
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-def xspec_fit_kernel(filelist,datadir,savedir):
+def xspec_fit_kernel(filelist,datadir,savedir,flux = False):
 	os.chdir(datadir)
 	alldatastr = ' '.join(filelist)
 	AllData.clear()
 	AllModels.clear()
 	AllData(alldatastr)
 	AllData.show()
-	AllData.ignore('1:**-200.0,40000.0-** 2-3:**-8.0,800.0-**')
+	AllData.ignore('1:**-200.0,40000.0-** 2-4:**-8.0,800.0-**')#我觉得这里可以留一个接口。
 	Model('grbm')
 	Fit.statMethod='pgstat'
 	Fit.nIterations=1000
@@ -17,7 +17,9 @@ def xspec_fit_kernel(filelist,datadir,savedir):
 	Fit.perform()
 	Fit.error('3.0 3')
 	Fit.perform()
-	AllModels.calcFlux("8. 40000.0 err") #参数需要一个能量的范围，之前在拟合光谱时我们设置了一个范围，我们暂时用它。
+	if flux :
+
+		AllModels.calcFlux("8. 40000.0 err") #参数需要一个能量的范围，之前在拟合光谱时我们设置了一个范围，我们暂时用它。
 	par3=AllModels(1)(3)#第一个模型的第三个参数
 	value = par3.values[0]
 	value_arr1,value_arr2,ffff = par3.error
@@ -25,8 +27,9 @@ def xspec_fit_kernel(filelist,datadir,savedir):
 	flux_list = []
 	for i in range(len(filelist)):
 		print(i)
-		flux = AllData(i+1).flux
-		flux_list.append(flux)
+		if(flux):
+			flux = AllData(i+1).flux
+			flux_list.append(flux)
 		energies=Plot.x(i+1)
 		rates=Plot.y(i+1)
 		folded=Plot.model(i+1)
@@ -43,8 +46,11 @@ def xspec_fit_kernel(filelist,datadir,savedir):
 	plt.yscale('log')
 	plt.savefig(savedir + 'foldedspec.png')
 	#plt.close()
-	return value,value_arr1,value_arr2,np.array(flux_list).T
+	if flux :
 
+		return value,value_arr1,value_arr2,np.array(flux_list).T
+	else:
+		return value,value_arr1,value_arr2
 
 
 

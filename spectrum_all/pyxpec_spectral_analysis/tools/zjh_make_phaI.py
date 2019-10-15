@@ -147,15 +147,17 @@ def make_phaI(bn,ni,topdir,savedir,slice_start,slice_stop,binsize = 1,time_start
 
 			#bin_t = (bin_edges[1:]+bin_edges[:-1])*0.5          #获得单能道光变曲线
 			bin_t = bin_edges[:-1]                               #只要前边界
-			#bin_rate = bin_n/binsize
+			bin_rate = bin_n/binsize
 
 			#t_r,cs,bs = r_baseline(bin_t,bin_n)                 #获得单能道背景
 			t_r,cs,bs = Baseline_in_time(bin_t,bin_n).get_value()
+			cs = cs/binsize
+			bs = bs/binsize
 			slice_index = np.where((bin_t>=value) & (bin_t<=slice_stop[index]))[0]
 			slice_index = slice_index[:-1]                      #排除掉最后一个可能不完整的bin
 			#print('slice index:\n',slice_index)
 			#print('bs:\n',bs[slice_index])
-			total_rate[i] = (bin_n[slice_index]).mean()
+			total_rate[i] = (bin_rate[slice_index]).mean()
 			bkg_rate[i] = (bs[slice_index]).mean()
 			if(total_rate[i] <= bkg_rate[i]):
 				bkg_rate[i] = total_rate[i] #限制背景高度
@@ -177,7 +179,7 @@ def make_phaI(bn,ni,topdir,savedir,slice_start,slice_stop,binsize = 1,time_start
 		plt.ylabel('counts /N')
 		plt.xscale('log')
 		plt.yscale('log')
-		plt.savefig(savedir+'Z_slic_'+bn+'_'+ni+str(index)+'.png')
+		plt.savefig(savedir+'Z_slic_'+bn+'_'+ni+'_'+str(index)+'.png')
 		plt.close()
 
 
