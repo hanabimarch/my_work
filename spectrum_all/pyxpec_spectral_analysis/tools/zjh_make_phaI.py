@@ -1,9 +1,9 @@
 from astropy.io import fits
 import numpy as np
 import os
-#from zjh_data_analysis import r_baseline
-from Separate_background.background_kernel import Baseline_in_time
-from Separate_background import Separate_background
+from .zjh_data_analysis import r_baseline
+from .Separate_background.background_kernel import Baseline_in_time
+from .Separate_background import Separate_background
 from glob import glob
 import matplotlib.pyplot as plt
 import shutil
@@ -149,7 +149,7 @@ def make_phaI(bn,ni,topdir,savedir,slice_start,slice_stop,binsize = 1,time_start
 			bin_t = bin_edges[:-1]                               #只要前边界
 			bin_rate = bin_n/binsize
 
-			#t_r,cs,bs = r_baseline(bin_t,bin_n)                 #获得单能道背景
+			#t_r,cs,bs = r_baseline(bin_t,bin_n,lam = 4)                 #获得单能道背景
 			t_r,cs,bs = Baseline_in_time(bin_t,bin_n).get_value()
 			cs = cs/binsize
 			bs = bs/binsize
@@ -161,7 +161,8 @@ def make_phaI(bn,ni,topdir,savedir,slice_start,slice_stop,binsize = 1,time_start
 			bkg_rate[i] = (bs[slice_index]).mean()
 			if(total_rate[i] <= bkg_rate[i]):
 				bkg_rate[i] = total_rate[i] #限制背景高度
-
+			if(bkg_rate[i]<0):
+				bkg_rate[i] = 0
 			exposure = len(slice_index)*binsize
 			bkg_uncertainty[i] = np.sqrt(bkg_rate[i]/exposure)
 			total_uncertainty[i] = np.sqrt(total_rate[i]/exposure)
@@ -176,7 +177,7 @@ def make_phaI(bn,ni,topdir,savedir,slice_start,slice_stop,binsize = 1,time_start
 		plt.errorbar(x,bkg_rate/e_diff,yerr = bkg_uncertainty/e_diff,color = 'blue')
 		plt.errorbar(x,total_rate/e_diff,yerr = total_uncertainty/e_diff,color = 'r')
 		plt.xlabel('energy KeV')
-		plt.ylabel('counts /N')
+		plt.ylabel('counts rate')
 		plt.xscale('log')
 		plt.yscale('log')
 		plt.savefig(savedir+'Z_slic_'+bn+'_'+ni+'_'+str(index)+'.png')

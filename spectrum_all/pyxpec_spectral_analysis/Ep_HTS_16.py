@@ -10,9 +10,13 @@ data_topdir = '/media/laojin/Elements/trigdata/'
 #-------------------
 #输出结果地址--------
 result_topdir = '/home/laojin/my_work/spectrum_all/pyxpec_spectral_analysis/results/'
-#---------------------
+#------------------------------------------------------------
 
-bnname,dete,max_ = readcol('./Ep_HTS_16_samples.txt')
+#bnname,dete,max_ = readcol('./Ep_HTS_16_samples.txt')
+bnname,dete,max_ = readcol('./Ep_HTS_16_samples1.txt')
+
+binsize = 0.1                                #积分光变曲线用的时间切片的大小。
+#----------------------------------------------------------------
 bnname = np.array(bnname)
 dete = np.array(dete)
 max_ = np.array(max_)
@@ -72,7 +76,7 @@ for name in name_list:
 	edges0 = np.arange(start_edges-2,stop_edges+2+dt,dt)
 	bin_n,edges0 = np.histogram(t,bins = edges0)
 	bin_c = (edges0[1:]+edges0[:-1])*0.5
-	edges = bayesian_blocks(bin_c,np.rint(bin_n),fitness = 'events',p0 = 0.01)[1:-1]#从第二到倒数第二个。
+	edges = bayesian_blocks(bin_c,np.rint(bin_n),fitness = 'events',p0 = 0.01)[1:-1]  #从第二到倒数第二个。
 	
 	slic_start = edges[:-1]
 	slic_top = edges[1:]
@@ -83,7 +87,7 @@ for name in name_list:
 	Ep_err1 = []
 	Ep_err2 = []		
 	for dete_n in dete:
-		make_phaI(name,dete_n,sampledir,save_dir,slic_start,slic_top,binsize = 0.064)
+		make_phaI(name,dete_n,sampledir,save_dir,slic_start,slic_top,binsize = binsize)
 		
 	for i in range(len(slic_start)):
 		filelist = []
