@@ -1,5 +1,5 @@
 # Pyxspec spectral analysis
-运行前需要修改脚本数据路径
+运行前需要修改脚本Ep_HTS_16.py中的数据路径
 
 
 
