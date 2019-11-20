@@ -34,10 +34,12 @@ def get_txx(t,binsize = 0.5,sigma = 1,step_size = 1,block_n = 50,block_time = No
 	t_c = (bin_edges[1:]+bin_edges[:-1])*0.5
 	rate = bin_n/binsize
 
-	SNR_result = SNR_text(t_c,rate,step_size = step_size,
+	backobject = Baseline_in_time(t_c,rate,fitness = 'bottom_r',lam = 4,it = 10)
+	bs_m= np.mean(backobject.bs)
+	SNR_result = SNR_text(t_c,backobject.cs+bs_m,step_size = step_size,
 			      block_n = block_n,block_time = block_time,
 			      time_unified=time_unified,lambda_= hardness)
-	bs = SNR_result['bs']
+	bs = SNR_result['bs']+backobject.bs-bs_m
 	good_index = SNR_result['good_index']
 	pp = SNR_result['normallization']
 	#贝叶斯
@@ -50,8 +52,8 @@ def get_txx(t,binsize = 0.5,sigma = 1,step_size = 1,block_n = 50,block_time = No
 	for one_index in good_index:
 		#print('one_index:',one_index)
 		t_c_in_one = t_c[one_index]
-		t_in_one_start = t_c_in_one[0]-15#*binsize
-		t_in_one_stop = t_c_in_one[-1]+15#*binsize
+		t_in_one_start = t_c_in_one[0]-20#*binsize
+		t_in_one_stop = t_c_in_one[-1]+30#*binsize
 		print('range:',t_in_one_stop-t_in_one_start)
 		if bayesian:
 			t_in_one = t[np.where((t>=t_in_one_start)&(t<=t_in_one_stop))[0]]
@@ -62,7 +64,8 @@ def get_txx(t,binsize = 0.5,sigma = 1,step_size = 1,block_n = 50,block_time = No
 			else:
 				t_b_index = np.where((t_c>=t_in_one_start)&(t_c<=t_in_one_stop))[0]
 				t_b = t_c[t_b_index]
-				bin_n_b = bin_n[t_b_index]
+				#bin_n_b = bin_n[t_b_index]
+				bin_n_b = np.around((backobject.cs+bs_m)[t_b_index]*binsize)
 				#print(t_b)
 				edges = bayesian_blocks(t_b,bin_n_b,fitness = 'events',gamma = np.exp(-12))
 			print('edges: ',edges)
@@ -164,6 +167,7 @@ def bined_hist(t,v,bins):
 	return np.array(re)
 
 def found_edges(edges,v):
+	print('v',v)
 	if len(edges) == 4:
 		return 0.5*(edges[0]+edges[1]),0.5*(edges[2]+edges[3])
 	edges  =  np.array(edges)
@@ -171,7 +175,11 @@ def found_edges(edges,v):
 	edges_start = edges[:-1]
 	edges_stop = edges[1:]
 	edges_size = edges_stop - edges_start
-	size_sort = np.sort(edges_size)[-2:]  #尺寸最大的块
+	if(len(edges)<6):
+		k = 2
+	else:
+		k = 3
+	size_sort = np.sort(edges_size)[-k:]  #尺寸最大的块
 	start_time = edges_start[0]
 	stop_time = edges_stop[-1]
 	trait = []
@@ -203,13 +211,14 @@ def found_edges(edges,v):
 				trait.append(cafe)
 			else:
 				trait.append(fringe)
+	print(trait)
 	for i in range(len(v)):
 		if(trait[i] == cafe):
-			start_time = (edges_start[i]+edges_stop[i])*0.5
+			start_time = edges_stop[i] - 0.5
 			break
 	for i in range(len(v)):
 		if(trait[-1-i] == cafe):
-			stop_time = (edges_start[-1-i]+edges_stop[-1-i])*0.5
+			stop_time = edges_start[-1-i] + 0.5
 			break
 	return start_time,stop_time
 

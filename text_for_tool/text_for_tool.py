@@ -7,8 +7,12 @@ from Calculate_duration import Plot
 from Calculate_duration import get_txx
 topdir = '/home/laojin/trigdata/2017/'
 
-samples = np.array(zhf.readcol('./samples.txt')).T
+bn,ni = zhf.readcol('./samples.txt')
 
+indexbn = np.argsort(bn)
+
+samples = np.array([bn,ni]).T
+samples = samples[indexbn]
 savetop = './results/'
 
 if os.path.exists(savetop) == False:
@@ -43,7 +47,7 @@ for index,value in enumerate(samples):
 	t = t[ch_index]
 	ch = ch[ch_index]
 
-	results = get_txx(t,binsize=binsize,block_time = 50,time_unified=False,hardness = 200*1/binsize,sigma = 1)
+	results = get_txx(t,binsize=binsize,block_time = 40,time_unified=False,hardness = 200*1/binsize,sigma = 1)
 	myplt = Plot(results)
 	myplt.plot_light_curve()
 	savedir = savetop+value[0]+'/'

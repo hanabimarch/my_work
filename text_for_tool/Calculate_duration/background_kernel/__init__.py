@@ -12,7 +12,8 @@ from .r_baseline import r_baseline
 
 class Baseline_in_time(object):
 
-	def __init__(self,time,value,fitness = 'double',hardness = False,time_unified = True):
+	def __init__(self,time,value,fitness = 'bottom_r',hardness = False,time_unified = True,
+		     lam = 1,it = 8):
 		self.time = time
 		self.value = value
 
@@ -28,7 +29,7 @@ class Baseline_in_time(object):
 			dt = self.time[1]-self.time[0]
 			print('dt',dt)
 		cc = {#'double':self.AirPLS.double_airPLS(),'bottom':self.AirPLS.bottom_airPLS(),
-			      'bottom_r':self.AirPLS.bottom_r(dt = dt)}
+			      'bottom_r':self.AirPLS.bottom_r(dt = dt,lam = lam,it = it)}
 
 		self.unified_bs = cc[fitness]
 		if time_unified:
@@ -186,9 +187,9 @@ class AirPLS(object):
 
 		return bs
 
-	def bottom_r(self,dt):
+	def bottom_r(self,dt,lam=1,it = 8):
 
-		return r_baseline(self.x,dt,lam=1,it = 8)
+		return r_baseline(self.x,dt,lam=lam,it = it)
 
 
 
