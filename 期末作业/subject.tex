@@ -1,0 +1,74 @@
+\documentclass{article}
+\usepackage{geometry}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\usepackage{ctex}
+\usepackage{graphicx}
+\graphicspath{{results/}}
+\title{\heiti 期末作业题目}
+\author{邹金航}
+\begin{document}
+\maketitle
+题目:
+
+下表提供了某厂节能降耗技术改造后生产甲产品过程中记录的产量$x$(吨)与响应的生产能耗$y$(吨标准煤)的几组对照数据。
+
+\begin{table}[h]
+	\centering
+	\caption{生产记录}\label{table-1}
+	\begin{tabular}{|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|}
+		\hline
+		x & 3 & 4 & 5 & 6 \\
+		\hline
+		y & 2.5 & 3.0 & 4.0 & 4.5 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+(1) 画出上表数据的散点图：
+
+答：
+
+散点图见图\ref{fig-1} 。
+	
+\begin{figure}[h]
+
+	\centering
+	\includegraphics[width = 0.5\textwidth]{A_data_scatter.png}
+	\caption{数据散点}\label{fig-1}
+	
+\end{figure}
+(2) 根据上表提供的数据，用最小二乘法求出$y$关于$x$的线性回归方程
+$$y = bx + a$$
+
+答：
+
+计算公式推导见书P120 。
+\begin{equation}
+	b = \frac{\sum_{i=1}^n x_i y_i - n\bar{x}\bar{y}}{\sum_{i=1}^n x_i^2 - n \bar{x} ^2}\label{1}
+\end{equation}
+\begin{equation}
+	a = \bar{y} - b \bar{x}\label{2}
+\end{equation}
+经过计算得到参数数值为：$b = 0.70$，$a = 0.37$。拟合线见图 \ref{fig-2} 。
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 0.5\textwidth]{B_fitting_function.png}
+	\caption{拟合线}\label{fig-2}
+	
+\end{figure}
+
+(3) 已知该厂技改前100吨甲产品的生产能耗为90吨标准煤。根据(2)求出的线性回归方程预测生产100吨甲产品的生产能耗比技改前降低了多少吨标准煤。
+
+答：
+
+通过已求得的回归方程估计出技改后生产100吨甲产品需要消耗的标准煤吨数。之后对比技改前的生产记录求得技改后比技改前节约了多少能耗。计算过程如下：
+$$90 - (100 \times 0.7 + 0.35) = 19.65 (t)$$
+计算结果表明技改后每生产100吨甲产品比技改前节约19.65吨标准煤。
+
+
+\end{document}
+
+
+
+
