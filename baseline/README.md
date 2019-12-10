@@ -28,6 +28,37 @@ zjh_baseline.py 是参考了baseline的R代码编写的相同功能的代码，�
 
 同时我们对参数进行了优化，通过多次尝试，我们发现迭代次数为5时算法的时域适应性最好，大于5时容易引起背景基线偏低（但是并不会偏得太多），小于5时容易导致背景基线不平坦。
 
+## baseline 例子
+
+![光变曲线1](https://github.com/zoujinhang/my_work/tree/master/baseline/A_light_curve.png)
+
+1). zjh_baseline.py代码运行结果。蓝色线为光变曲线，黄色线为拟合的背景。
+
+![光变曲线2](https://github.com/zoujinhang/my_work/tree/master/baseline/A_light_curve2.png)
+
+2). zjh_baseline2.py代码运行结果。内容同上。可以看到蓝色光变曲线在结尾处存在数据的边缘效应，边缘效应导致了光变曲线的突然下降。而这影响到了结尾处背景的拟合，使背景基线偏低。
+
+![光变曲线3](https://github.com/zoujinhang/my_work/tree/master/baseline/A_light_curve3.png)
+
+3). zjh_baseline3.py代码运行结果。内容同上。可以看到蓝色的光变曲线在结尾处由于边缘效应导致了一次急速的下降。在算法改进之前，该效应会拉低背景基线从而导致背景基线脱离背景。经过改进后算法可以有效的忽略该效应的影响。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

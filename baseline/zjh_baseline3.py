@@ -155,7 +155,7 @@ t = time-trigtime
 
 ch_n = 50
 #t_index = np.where(ch == ch_n)
-t_index = np.where((t>=-150)&(t<=350))[0]
+t_index = np.where((t>=-150)&(t<=400))[0]
 t_ch = t[t_index]
 
 binsize = 0.5
