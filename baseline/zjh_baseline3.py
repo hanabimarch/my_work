@@ -139,7 +139,7 @@ def r_baseline(time,rate,lam = None,hwi = None,it = None,inti = None):
 topdir = '/home/laojin/trigdata/2017/'
 datalink = '/home/laojin/trigdata/2019/bn190114873/glg_tte_n7_bn190114873_v00.fit'
 #datalink = '/home/laojin/trigdata/2017/bn171010792/glg_tte_n8_bn171010792_v00.fit'
-savedir = '/home/laojin/shiyan/baseline/'
+savedir = '/home/laojin/my_work/baseline/'
 
 
 if(os.path.exists(savedir) == False):
@@ -178,7 +178,7 @@ plt.plot(bin_c,rate)
 #plt.plot(t_c,vv)
 plt.plot(t_c,bs)
 plt.ylim([0,2500])
-plt.savefig(savedir + 'A_light_curve.png')
+plt.savefig(savedir + 'A_light_curve3.png')
 plt.close()
 
 
