@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 import os
 import datetime
-
+from zjh_data_analysis import r_baseline
 
 def WhittakerSmooth(x,w,lambda_):
 	'''
@@ -30,7 +30,7 @@ def WhittakerSmooth(x,w,lambda_):
 
 def baseline(spectra,lambda_,hwi,it,int_):
 	spectra = np.array(spectra)
-	spectra_index = np.arange(0,spectra.size,1)
+	#spectra_index = np.arange(0,spectra.size,1)
 	wl = np.ones(spectra.shape[0])
 	spectra = WhittakerSmooth(spectra,wl,lambda_)
 
@@ -49,10 +49,8 @@ def baseline(spectra,lambda_,hwi,it,int_):
 	minip = (lefts+rights)*0.5#索引
 	xx = np.zeros(int_)
 	for i in range(int_):#这里是一个rebin的过程,这里可以提速
-		if rights[i]+1 < spectra.size -1:
-			xx[i] = np.mean(spectra[lefts[i]:rights[i]+1])
-		else:
-			xx[i] = np.mean(spectra[lefts[i]:])
+		xx[i] = spectra[lefts[i]:rights[i]+1].mean()
+
 	'''
 	mreg_n = 10 #int(spectra.size/int_)
 	cutoff = int(spectra.size/mreg_n)*mreg_n
@@ -75,28 +73,22 @@ def baseline(spectra,lambda_,hwi,it,int_):
 		# Point-wise iteration to the right
 		for j in range(1,int_-1):
 			# Interval cut-off close to edges
-			v = np.min([j,w0,int_-j-1])
+			v = min([j,w0,int_-j-1])
 			# Baseline suppression
-			if j+v+1 < int_-1 :
-				a = np.mean(xx[j-v:j+v+1])
-			else:
-				a = np.mean(xx[j-v:])
-			xx[j] = np.min([a,xx[j]])
+			a = xx[j-v:j+v+1].mean()
+			xx[j] = min([a,xx[j]])
 		for j in range(1,int_-1):
 			k = int_-j-1
-			v = np.min([j,w0,int_-j-1])
-			if k + v+1 < int_-1:
-				a = np.mean(xx[k-v:k+v+1])
-			else:
-				a = np.mean(xx[k-v:])
-			xx[k] = np.min([a,xx[k]])
+			v = min([j,w0,int_-j-1])
+			a = xx[k-v:k+v+1].mean()
+			xx[k] = min([a,xx[k]])
 	minip = np.concatenate(([0],minip,[spectra.size-1]))
 	xx = np.concatenate((xx[:1],xx,xx[-1:]))
 	index = np.arange(0,spectra.size,1)
 	xxx = np.interp(index,minip,xx)
 	return xxx
 
-def r_baseline(time,rate,lam = None,hwi = None,it = None,inti = None):
+def r_baseline1(time,rate,lam = None,hwi = None,it = None,inti = None):
 	dt = time[1]-time[0]
 
 	if(lam is None):
@@ -104,7 +96,7 @@ def r_baseline(time,rate,lam = None,hwi = None,it = None,inti = None):
 	if(hwi is None):
 		hwi = int(40/dt)
 	if(it is None):
-		it = 9
+		it = 10
 	if(inti is None):
 
 		fillpeak_int = int(len(rate)/10)
@@ -118,8 +110,8 @@ def r_baseline(time,rate,lam = None,hwi = None,it = None,inti = None):
 
 
 topdir = '/home/laojin/trigdata/2017/'
-datalink = '/home/laojin/trigdata/2019/bn190114873/glg_tte_n7_bn190114873_v00.fit'
-#datalink = '/home/laojin/trigdata/2017/bn171010792/glg_tte_n8_bn171010792_v00.fit'
+#datalink = '/home/laojin/trigdata/2019/bn190114873/glg_tte_n7_bn190114873_v00.fit'
+datalink = '/home/laojin/trigdata/2017/bn171010792/glg_tte_n8_bn171010792_v00.fit'
 savedir = '/home/laojin/my_work/baseline/'
 
 
@@ -139,7 +131,7 @@ ch_n = 50
 t_index = np.where((t>=-200)&(t<=500))[0]
 t_ch = t[t_index]
 
-binsize = 0.5
+binsize = 0.1
 edges = np.arange(t_ch[0],t_ch[-1]+binsize,binsize)
 bin_n,bin_edges = np.histogram(t_ch,bins=edges)
 
@@ -147,13 +139,21 @@ bin_c = (bin_edges[1:]+bin_edges[:-1])*0.5
 
 rate = bin_n/(bin_edges[1:]-bin_edges[:-1])
 
+
+
 print('---------------------------------------')
 start = datetime.datetime.now()
-t_c,cs,bs = r_baseline(bin_c,rate)
+t_c,cs,bs = r_baseline1(bin_c,rate)
 end = datetime.datetime.now()
+print('python耗时：',end-start)
+print('---------------------------------------')
+r_start = datetime.datetime.now()
+t_c1,cs1,bs1 = r_baseline(bin_c,rate)
+r_end = datetime.datetime.now()
+print('R耗时：',r_end-r_start)
 print('---------------------------------------')
 
-print('耗时：',end-start)
+
 plt.figure()
 plt.plot(bin_c,rate)
 plt.plot(t_c,bs)

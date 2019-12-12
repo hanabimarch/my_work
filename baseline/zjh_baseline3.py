@@ -66,10 +66,8 @@ def baseline(spectra,lambda_,hwi,it,int_):
 	minip = (lefts+rights)*0.5#索引
 	xx = np.zeros(int_)
 	for i in range(int_):#这里是一个rebin的过程,这里可以提速
-		if rights[i]+1 < spectra.size -1:
-			xx[i] = np.mean(spectra[lefts[i]:rights[i]+1])
-		else:
-			xx[i] = np.mean(spectra[lefts[i]:])
+		xx[i] = spectra[lefts[i]:rights[i]+1].mean()
+
 	'''
 	spectra_index = np.arange(0, spectra.size, 1)
 	mreg_n = 10 #int(spectra.size/int_)
@@ -93,21 +91,16 @@ def baseline(spectra,lambda_,hwi,it,int_):
 		# Point-wise iteration to the right
 		for j in range(1,int_-1):
 			# Interval cut-off close to edges
-			v = np.min([j,w0,int_-j-1])
+			v = min([j,w0,int_-j-1])
 			# Baseline suppression
-			if j+v+1 < int_-1 :
-				a = np.mean(xx[j-v:j+v+1])
-			else:
-				a = np.mean(xx[j-v:])
-			xx[j] = np.min([a,xx[j]])
+			a = xx[j-v:j+v+1].mean()
+			xx[j] = min([a,xx[j]])
 		for j in range(1,int_-1):
 			k = int_-j-1
-			v = np.min([j,w0,int_-j-1])
-			if k + v+1 < int_-1:
-				a = np.mean(xx[k-v:k+v+1])
-			else:
-				a = np.mean(xx[k-v:])
-			xx[k] = np.min([a,xx[k]])
+			v = min([j,w0,int_-j-1])
+			a = xx[k-v:k+v+1].mean()
+			xx[k] = min([a,xx[k]])
+
 	minip = np.concatenate(([0],minip,[spectra.size-1]))
 	xx = np.concatenate((xx[:1],xx,xx[-1:]))
 	index = np.arange(0,spectra.size,1)
@@ -155,7 +148,7 @@ t = time-trigtime
 
 ch_n = 50
 #t_index = np.where(ch == ch_n)
-t_index = np.where((t>=-150)&(t<=400))[0]
+t_index = np.where((t>=-150)&(t<=350))[0]
 t_ch = t[t_index]
 
 binsize = 0.5
