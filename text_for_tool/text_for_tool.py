@@ -47,7 +47,7 @@ for index,value in enumerate(samples):
 	t = t[ch_index]
 	ch = ch[ch_index]
 
-	results = get_txx(t,binsize=binsize,block_time = 40,time_unified=False,hardness = 200*1/binsize,sigma = 1)
+	results = get_txx(t,binsize=binsize,block_time = 20,time_unified=False,hardness = 500*1/binsize,sigma = 1,it = 100)
 	myplt = Plot(results)
 	myplt.plot_light_curve()
 	savedir = savetop+value[0]+'/'
@@ -73,3 +73,13 @@ for index,value in enumerate(samples):
 	myplt.plot_normallization()
 	plt.savefig(savedir+'C_normall.png')
 	plt.close()
+	
+	myplt.plot_ACC()
+	plt.savefig(savedir + 'D_ACC.png')
+	plt.close()
+
+
+
+
+
+

@@ -34,12 +34,12 @@ def get_txx(t,binsize = 0.5,sigma = 1,step_size = 1,block_n = 50,block_time = No
 	t_c = (bin_edges[1:]+bin_edges[:-1])*0.5
 	rate = bin_n/binsize
 
-	backobject = Baseline_in_time(t_c,rate,fitness = 'bottom_r',lam = 4,it = 10)
-	bs_m= np.mean(backobject.bs)
+	backobject = Baseline_in_time(t_c,rate,case = 'TD')
+	bs_m = np.mean(backobject.bs)
 	SNR_result = SNR_text(t_c,backobject.cs+bs_m,step_size = step_size,
 			      block_n = block_n,block_time = block_time,
 			      time_unified=time_unified,lambda_= hardness)
-	bs = SNR_result['bs']+backobject.bs-bs_m
+	bs = SNR_result['bs']+backobject.bs - bs_m
 	good_index = SNR_result['good_index']
 	pp = SNR_result['normallization']
 	#贝叶斯
@@ -49,16 +49,43 @@ def get_txx(t,binsize = 0.5,sigma = 1,step_size = 1,block_n = 50,block_time = No
 	by_rate_list = []
 	w = np.ones(len(rate))
 	print(len(good_index))
+
+	t_start = []
+	t_stop = []
 	for one_index in good_index:
+		t_c_in_one = t_c[one_index]
+		t_start.append(t_c_in_one[0])#-40#*binsize
+		t_stop.append(t_c_in_one[-1])#+40#*binsize
+	t_start = np.array(t_start)
+	t_stop = np.array(t_stop)
+	center_time = t_start[1:]-t_stop[:-1]
+	center_time[center_time > 32] = 32
+
+	
+	for index,one_index in enumerate(good_index):
 		#print('one_index:',one_index)
 		t_c_in_one = t_c[one_index]
-		t_in_one_start = t_c_in_one[0]-20#*binsize
-		t_in_one_stop = t_c_in_one[-1]+30#*binsize
+		
+		if center_time.size == 0:
+			t_in_one_start = t_c_in_one[0]-32
+			t_in_one_stop = t_c_in_one[-1]+32
+		else:
+			if index == 0:
+				t_in_one_start = t_c_in_one[0]-32#*binsize
+				t_in_one_stop = t_c_in_one[-1]+center_time[index]#*binsize
+			elif(index == center_time.size):
+				print('dddd')
+				t_in_one_start = t_c_in_one[0]-center_time[index-1]
+				t_in_one_stop = t_c_in_one[-1]+32
+			else:
+				t_in_one_start = t_c_in_one[0]-center_time[index-1]
+				t_in_one_stop = t_c_in_one[-1]+center_time[index]
+		
 		print('range:',t_in_one_stop-t_in_one_start)
 		if bayesian:
 			t_in_one = t[np.where((t>=t_in_one_start)&(t<=t_in_one_stop))[0]]
 
-			if len(t_in_one) <= 10000:
+			if len(t_in_one) <= 50000:
 
 				edges = bayesian_blocks(t_in_one,fitness = 'events',gamma = np.exp(-12))
 			else:
@@ -95,7 +122,7 @@ def get_txx(t,binsize = 0.5,sigma = 1,step_size = 1,block_n = 50,block_time = No
 				print('max_SNR',max_SNR)
 				if SNR :
 
-					if max_SNR > sigma:#说明有信噪比够好
+					if max_SNR > 0.5:#说明有信噪比够好
 						print('max_good')
 						time_edges.append([t_start, t_stop])
 						max_SNR_list.append(max_SNR)
@@ -104,7 +131,6 @@ def get_txx(t,binsize = 0.5,sigma = 1,step_size = 1,block_n = 50,block_time = No
 					else:#信号太弱，忽略脉冲
 						print('max_not_good')
 						w[np.where((t_c >= t_start) & (t_c <= t_stop))[0]] = 1
-
 						bs = WhittakerSmooth(rate, w, lambda_=hardness)
 
 				else:
@@ -123,7 +149,9 @@ def get_txx(t,binsize = 0.5,sigma = 1,step_size = 1,block_n = 50,block_time = No
 			'rate':rate,
 			'bs':bs,
 			'normallization':pp,
-			'sigma':SNR_result['sigma']}
+			'sigma':SNR_result['sigma'],
+			'ACC':SNR_result['ACC'],
+			'ACCT':SNR_result['ACCT']}
 		if bayesian:
 			print('have bayesian blocks.')
 			result['bayesian_edges'] = by_edges_list
@@ -141,7 +169,10 @@ def get_txx(t,binsize = 0.5,sigma = 1,step_size = 1,block_n = 50,block_time = No
 	result['rate'] = rate
 	result['normallization'] = pp
 	result['sigma'] = SNR_result['sigma']
-	result['bs'] = bs
+	result['bs'] = bs	
+	result['ACC'] = SNR_result['ACC']
+	result['ACCT'] = SNR_result['ACCT']
+	print(result['ACCT'])
 	if bayesian:
 		print('have bayesian blocks.')
 		result['bayesian_edges'] = by_edges_list
@@ -167,7 +198,6 @@ def bined_hist(t,v,bins):
 	return np.array(re)
 
 def found_edges(edges,v):
-	print('v',v)
 	if len(edges) == 4:
 		return 0.5*(edges[0]+edges[1]),0.5*(edges[2]+edges[3])
 	edges  =  np.array(edges)
@@ -175,7 +205,7 @@ def found_edges(edges,v):
 	edges_start = edges[:-1]
 	edges_stop = edges[1:]
 	edges_size = edges_stop - edges_start
-	if(len(edges)<6):
+	if (len(edges) < 6):
 		k = 2
 	else:
 		k = 3
@@ -211,14 +241,13 @@ def found_edges(edges,v):
 				trait.append(cafe)
 			else:
 				trait.append(fringe)
-	print(trait)
 	for i in range(len(v)):
 		if(trait[i] == cafe):
 			start_time = edges_stop[i] - 0.5
 			break
 	for i in range(len(v)):
 		if(trait[-1-i] == cafe):
-			stop_time = edges_start[-1-i] + 0.5
+			stop_time = edges_start[-1 - i] + 0.5
 			break
 	return start_time,stop_time
 

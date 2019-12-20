@@ -9,8 +9,7 @@ class Plot(object):
 	def __init__(self,result):
 
 		self.result = result
-
-
+	
 	def plot_light_curve(self,**k):
 		t = self.result['t_c']
 		rate = self.result['rate']
@@ -178,6 +177,11 @@ class Plot(object):
 		plt.plot(t,normallization,**kwargs)
 
 
+	def plot_ACC(self,**kwargs):
+
+		ACCT = self.result['ACCT']
+		ACC = self.result['ACC']
+		plt.plot(ACCT,ACC)
 
 
 
