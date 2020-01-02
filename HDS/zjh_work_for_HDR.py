@@ -43,6 +43,8 @@ baye_edges = bayesian_blocks(t_c,np.round((cs+bs.mean())*dt),fitness='events',ga
 
 
 #首先画出光变曲线和bayesian blocks的边界。
+
+#没有扣背景的情况下的硬度比变化：
 ch_standed = 25
 
 t_h = t[np.where(ch>=ch_standed)[0]]
@@ -58,7 +60,7 @@ bin_s_size = bin_s_edges[1:] - bin_s_edges[:-1]
 bin_s_c = (bin_s_edges[1:]+bin_s_edges[:-1])*0.5
 bin_s_rate = bin_n_s/bin_h_size
 
-HDS = bin_h_rate/bin_s_rate
+HDS = bin_h_rate/bin_s_rate     #硬度比在这里
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
@@ -74,7 +76,7 @@ plt.savefig(savedir+'A_light_curve.png')
 plt.close()
 
 
-#没有扣背景的情况下的硬度比变化：
+#扣背景后的硬度比
 
 Sample = Separate_background(t,ch,ch_n,time_range=[-15,60])#工具包里的内容
 
@@ -90,7 +92,6 @@ plt.plot(t_b,b_e,',',color = 'k')
 plt.yscale('log')
 plt.ylabel('Energy kev')
 plt.xlim([-15,60])
-
 
 plt.subplot(3,1,2)
 plt.plot(t_s,s_e,',',color = 'k')
@@ -138,7 +139,8 @@ bin_s_size = bin_s_edges[1:] - bin_s_edges[:-1]
 bin_s_c = (bin_s_edges[1:]+bin_s_edges[:-1])*0.5
 bin_s_rate = bin_n_s/bin_h_size
 
-HDS = bin_h_rate/bin_s_rate
+HDS = bin_h_rate/bin_s_rate  #这里是硬度比
+
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
 ax1.plot(t_c,cs,color = 'k')
@@ -168,7 +170,8 @@ bin_s_size = bin_s_edges[1:] - bin_s_edges[:-1]
 bin_s_c = (bin_s_edges[1:]+bin_s_edges[:-1])*0.5
 bin_s_rate = bin_n_s/bin_h_size
 
-HDS = bin_h_rate/bin_s_rate
+HDS = bin_h_rate/bin_s_rate #这里是硬度比
+
 fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
 ax1.plot(bin_b_c,bin_rate_b,color = 'k')
