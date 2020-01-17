@@ -21,7 +21,7 @@ def make_phaI_with_events(bn,ni,topdir,savedir,slice_start,slice_stop,time_start
 	:param time_stop:
 	:return:
 	'''
-
+	print('#############################################################')
 	datalink = topdir + bn + '/' + 'glg_tte_' + ni + '_' + bn + '_v*.fit'
 	datalink = glob(datalink)[0]
 	if (os.path.exists(savedir) == False):
@@ -115,8 +115,7 @@ def make_phaI(bn,ni,topdir,savedir,slice_start,slice_stop,binsize = 1,time_start
 
 	t = data_.field(0) - trigtime
 	ch = data_.field(1)
-	
-	print('###########G')
+
 	ebound = hdu['EBOUNDS'].data
 
 	#ch_n = ebound.field(0)
@@ -131,7 +130,7 @@ def make_phaI(bn,ni,topdir,savedir,slice_start,slice_stop,binsize = 1,time_start
 	先获得各个能道的光变曲线，然后通过r_baseline获得背景曲线，最后总计切片中的内容
 	
 	'''
-
+	print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
 	edges = np.arange(time_start,time_stop+binsize,binsize)    #生成统计时间片边界数组
 
 	total_rate = np.zeros(128)
@@ -147,29 +146,38 @@ def make_phaI(bn,ni,topdir,savedir,slice_start,slice_stop,binsize = 1,time_start
 		bin_n,bin_edges = np.histogram(t_ch,bins = edges)
 		bin_t = bin_edges[:-1]
 		bin_rate = bin_n/binsize
-		bs = Baseline_in_time(bin_t,bin_n/bin_rate).bs
+		bs = Baseline_in_time(bin_t,bin_rate).bs
 		data.append([bin_rate,bs])
+		plt.plot(bin_t,bin_rate)
+		plt.plot(bin_t,bs)
+		plt.savefig(savedir+'Z_channel_'+str(i)+'.png')
+		plt.close()
 
-	for index,value in enumerate(slice_start):
-		for i in data:
+
+	for index1,value in enumerate(slice_start):
+		for index,i in enumerate(data):
+			
 			bin_t = edges[:-1]
 			bin_rate,bs = i
-			slice_index = np.where((bin_t>=value) & (bin_t<=slice_stop[index]))[0]
+			#print(bin_rate)
+			slice_index = np.where((bin_t>=value) & (bin_t<=slice_stop[index1]))[0]
 			#slice_index = slice_index[:-1]                      #排除掉最后一个可能不完整的bin
 			#print('slice index:\n',slice_index)
 			#print('bs:\n',bs[slice_index])
-			total_rate[i] = (bin_rate[slice_index]).mean()
-			bkg_rate[i] = (bs[slice_index]).mean()
-			if(total_rate[i] <= bkg_rate[i]):
-				bkg_rate[i] = total_rate[i] #限制背景高度
-			if(bkg_rate[i]<0):
-				bkg_rate[i] = 0
+			#ret = np.mean(bin_rate[slice_index])
+			#print(np.mean(bin_rate[slice_index]))
+			total_rate[index] = np.mean(bin_rate[slice_index])
+			bkg_rate[index] = np.mean(bs[slice_index])
+			if(total_rate[index] <= bkg_rate[index]):
+				bkg_rate[index] = total_rate[index] #限制背景高度
+			if(bkg_rate[index]<0):
+				bkg_rate[index] = 0
 			exposure = len(slice_index)*binsize
-			bkg_uncertainty[i] = np.sqrt(bkg_rate[i]/exposure)
-			total_uncertainty[i] = np.sqrt(total_rate[i]/exposure)
+			bkg_uncertainty[index] = np.sqrt(bkg_rate[index]/exposure)
+			total_uncertainty[index] = np.sqrt(total_rate[index]/exposure)
 
-		write_phaI(total_rate,bn,ni,value,slice_stop[index],savedir+'A_'+bn+'_'+ni+'_'+str(index)+'.pha',index,1)
-		write_phaI(bkg_rate,bn,ni,value,slice_stop[index],savedir+'A_'+bn+'_'+ni+'_'+str(index)+'.bkg',index,1)
+		write_phaI(total_rate,bn,ni,value,slice_stop[index1],savedir+'A_'+bn+'_'+ni+'_'+str(index1)+'.pha',index1,1)
+		write_phaI(bkg_rate,bn,ni,value,slice_stop[index1],savedir+'A_'+bn+'_'+ni+'_'+str(index1)+'.bkg',index1,1)
 
 		x = np.sqrt(emin*emax)
 
